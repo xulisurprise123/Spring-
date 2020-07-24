@@ -1,4 +1,4 @@
-package com.itcast.pojo;
+package cn.itcast.pojo;
 
 public class EnglishSay implements Person.ISay {
     @Override

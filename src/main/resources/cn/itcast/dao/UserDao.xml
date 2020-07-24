@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.dao.UserDao">
+    <update id="updateUser" parameterType="cn.itcast.domain.User">
+      update sys_user
+        <set>
+            object_version_number = object_version_number + 1,
+            <if test="userNumber!=null">
+                user_number = #{userNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="userName!=null">
+                user_number = #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="address!=null">
+                address = #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="creationDate!=null">
+                creation_date = #{creationDate},
+            </if>
+            <if test="createdBy!=null">
+                created_by = #{createdBy},
+            </if>
+            <if test="lastUpdateDate!=null">
+                last_update_date = #{lastUpdateDate},
+            </if>
+            <if test="lastUpdatedBy!=null">
+                last_updated_by = #{lastUpdatedBy},
+            </if>
+        </set>
+        where user_id = #{userId,jdbcType=BIGINT}
+    </update>
+
+
+    <delete id="deleteUser" parameterType="java.lang.Long">
+        delete from sys_user
+        where user_id = #{userId,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insertUser" keyProperty="user_id" useGeneratedKeys="true" parameterType="cn.itcast.domain.User">
+      insert into sys_user(user_Number,user_Name,address,creation_Date,created_By,last_Update_Date,last_Updated_by)
+      values(#{userNumber,jdbcType=VARCHAR},#{userName,jdbcType=VARCHAR},#{address,jdbcType=VARCHAR},#{creationDate,jdbcType=TIMESTAMP},#{createdBy,jdbcType=BIGINT},#{lastUpdateDate,jdbcType=TIMESTAMP},#{lastUpdatedBy,jdbcType=BIGINT})
+    </insert>
+
+
+<!--    配置查询结果的列名和实体类的属性名的对应关系-->
+    <resultMap id="orderLineQueryResult" type="cn.itcast.domain.OrderLineQueryResult">
+        <result property="orderNumber" column="order_number" ></result>
+        <result property="userName" column="user_name"  ></result>
+        <result property="address" column="address"  ></result>
+        <result property="remark" column="remark" ></result>
+        <result property="createdByName" column="created_by_name"></result>
+        <result property="orderLineNumber" column="order_line_number"></result>
+        <result property="itemCode" column="item_code"></result>
+        <result property="itemName" column="item_name"></result>
+        <result property="unitPrice" column="unit_price"></result>
+        <result property="quantity" column="quantity"></result>
+        <result property="lineAmount" column="line_amount"></result>
+    </resultMap>
+    <select id="selectOrderLinesByCondition" parameterType="cn.itcast.domain.OrderLineQueryCondition" resultMap="orderLineQueryResult">
+        SELECT
+        oh.order_number AS order_number,
+        su.user_name AS user_name,
+        su.address AS address,
+        oh.remark AS remark,
+        su2.user_name AS created_by_name,
+        ol.order_line_number AS order_line_number,
+        ol.item_code AS item_code,
+        ol.item_name AS item_name,
+        ol.unit_price AS unit_price,
+        ol.quantity AS quantity,
+        ol.line_amount AS line_amount
+        FROM order_line ol
+        LEFT JOIN order_header oh ON ol.order_header_id = oh.order_header_id
+        LEFT JOIN sys_user su ON oh.customer_user_id = su.user_id
+        LEFT JOIN sys_user su2 ON ol.created_by = su2.user_id
+        <where>
+            <if test="orderNumber != null">
+                AND oh.order_number LIKE CONCAT('%', #{orderNumber}, '%')
+            </if>
+            <if test="orderLineNumber != null">
+                AND ol.order_line_number = #{orderLineNumber}
+            </if>
+            <if test="itemCode != null">
+                AND ol.item_code LIKE CONCAT('%', #{itemCode}, '%')
+            </if>
+            <if test="itemName != null">
+                AND ol.item_name LIKE CONCAT('%', #{itemName}, '%')
+            </if>
+            <if test="createdBy != null">
+                AND ol.created_by = #{createdBy}
+            </if>
+            <if test="customerUserId != null">
+                AND oh.customer_user_id = #{customerUserId}
+            </if>
+        </where>
+    </select>
+
+</mapper>
+<!-- 开发List<OrderLineQueryResult> selectOrderLinesByCondition(OrderLineQueryCondition condition);方法，-->
+<!--用以根据传入条件动态查询订单行数据。-->
+<!--查询条件包含订单编号(模糊)、订单行号、物料编码(模糊)、-->
+<!--物料名称(模糊)、订单创建人id、订单客户id。-->
+<!--查询结果包含订单编号、客户名称、客户地址、订单备注、订单创建人、订单行号、物料编码、物料名称、单价、数量、行总价-->

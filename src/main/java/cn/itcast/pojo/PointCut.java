@@ -1,4 +1,4 @@
-package com.itcast.pojo;
+package cn.itcast.pojo;
 
 public class PointCut {
     private String employeeid;

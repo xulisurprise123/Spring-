@@ -1,8 +1,8 @@
-package com.itcast.pojo;
+package cn.itcast.pojo;
 
 
 public class Person {
-    static interface ISay {
+    public static interface ISay {
         public void say();
     }
 }
